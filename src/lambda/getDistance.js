@@ -11,7 +11,7 @@ export function handler(event, context, callback) {
     console.log(distance)
     callback(null, {
       statusCode: 200,
-      body: JSON.stringify({ msg: distance }),
+      body: JSON.stringify({ msg: `${distance} meters` }),
     })
   }
   
