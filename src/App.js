@@ -22,7 +22,7 @@ class LambdaDemo extends Component {
 
     return (
       <p>
-        <button onClick={this.handleClick("getDistance")}>{loading ? "Getting distance..." : "Call Lambda"}</button>
+        <button onClick={this.handleClick("getDistance")}>{loading ? "Getting distance..." : "Get Distance"}</button>
         <br />
         <span>{msg}</span>
       </p>
