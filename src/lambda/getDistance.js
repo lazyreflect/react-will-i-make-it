@@ -1,6 +1,6 @@
 // this uses the callback syntax, however, we encourage you to try the async/await syntax shown in async-dadjoke.js
 // import getDistance from 'geolib/es/getDistance'
-import risopData from "./risopData.js";
+import risopData from "../risopData.js";
 import { getDistance } from "geolib";
 // const [userLatitude, setUserLatitude] = useState(51.5103)
 // const [userLongitude, setUserLongitude] = useState(7.49347)
@@ -32,6 +32,6 @@ export function handler(event, context, callback) {
   console.log('closest location data', closestLocation)
   callback(null, {
     statusCode: 200,
-    body: JSON.stringify({ msg: closestLocation.location }),
+    body: JSON.stringify({ msg: 'closestLocation.location' }),
   });
 }
