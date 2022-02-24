@@ -74,6 +74,7 @@ class CoordinatesForm extends Component {
           />
         </label>
         <br />
+        <br />
         <label>
           Longitude:
           <input
@@ -102,8 +103,9 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <p>Nuclear War Target Finder</p>
-          <p>Are you far enough away? (U.S. only)</p>
+          <p>Nuclear War Survival Odds Calculator</p>
+          <p> Enter a location (U.S. only) <br /></p>
+          <p><b>#ungmi</b><br /></p>
           <CoordinatesForm />
         </header>
       </div>
