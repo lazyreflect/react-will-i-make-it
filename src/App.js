@@ -54,7 +54,7 @@ const World = () => {
     setHeaderMsg(
       `You are ${
         (getClosestLocation.distance * 0.000621).toFixed(1)
-      } miles away from a potential nuclear war target.`
+      } miles away from a potential target.`
     );
     setFooterMsg(
       `${getClosestLocation.location.NAME}, ${getClosestLocation.location.COUNTY} County, ${getClosestLocation.location.ST} `
@@ -106,6 +106,9 @@ const World = () => {
   }, [])
   return (
     <div>
+      Open source RISOP nuclear target finder.
+      <br />
+      <br />
       Latitude: {userLatitude}
       <br />
       Longitude: {userLongitude}
