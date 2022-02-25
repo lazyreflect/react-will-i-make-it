@@ -12,9 +12,10 @@ import Globe from "react-globe.gl";
 // }
 const ARC_REL_LEN = 0.2; // relative to whole arc
 const FLIGHT_TIME = 15000;
-const NUM_RINGS = 500;
-const RINGS_MAX_R = 2.5; // deg
-const RING_PROPAGATION_SPEED = 5; // deg/sec
+const NUM_RINGS = 5;
+const RINGS_MAX_R = .5; // deg
+const RING_PROPAGATION_SPEED = 1; // deg/sec
+const NUMBER_OF_LOCATIONS = 5; // number of closest targets to show
 
 const { useState, useRef, useEffect, useCallback } = React;
 
@@ -23,9 +24,12 @@ const World = () => {
   const [userLongitude, setUserLongitude] = useState(null);
   const [arcsData, setArcsData] = useState([]);
   const [ringsData, setRingsData] = useState([]);
-  const [headerMsg, setHeaderMsg] = useState('Click on a location to find the nearest U.S. asset likely to be targeted in a Russian nuclear attack');
+  const [headerMsg, setHeaderMsg] = useState(
+    "Click on a location to find the nearest U.S. asset likely to be targeted in a Russian nuclear attack"
+  );
   const [footerMsg, setFooterMsg] = useState(null);
- 
+  const [getClosestNumberOfLocations, setGetClosestNumberOfLocations] =
+    useState([]);
 
   const prevCoords = useRef({ lat: 70.89, lng: 8.19 });
   const emitArc = useCallback(({ lat: endLat, lng: endLng }) => {
@@ -33,7 +37,6 @@ const World = () => {
     prevCoords.current = { lat: 70.89, lng: 8.19 }; // prevCoords.current = { lat: endLat, lng: endLng };
     setUserLatitude(endLat);
     setUserLongitude(endLng);
-    
 
     const getClosestLocation = risopData.reduce(
       (acc, curr) => {
@@ -52,22 +55,44 @@ const World = () => {
       { distance: Infinity, location: {} }
     );
     setHeaderMsg(
-      `You are ${
-        (getClosestLocation.distance * 0.000621).toFixed(1)
-      } miles away from:`
+      `You are ${(getClosestLocation.distance * 0.000621).toFixed(
+        1
+      )} miles away from:`
     );
     setFooterMsg(
       `${getClosestLocation.location.NAME}, ${getClosestLocation.location.SUBCLASS}, located in ${getClosestLocation.location.COUNTY} COUNTY, ${getClosestLocation.location.ST} `
     );
 
+    const getClosestNumberOfLocations = risopData
+      .sort(
+        (a, b) =>
+          getDistance(
+            { latitude: endLat, longitude: endLng },
+            { latitude: a.LATITUDE, longitude: a.LONGITUDE }
+          ) -
+          getDistance(
+            { latitude: endLat, longitude: endLng },
+            { latitude: b.LATITUDE, longitude: b.LONGITUDE }
+          )
+      )
+      .slice(0, NUMBER_OF_LOCATIONS);
     console.log(getClosestLocation);
+    console.log(getClosestNumberOfLocations);
+    setGetClosestNumberOfLocations(getClosestNumberOfLocations);
 
-    // add and remove arc after 1 cycle
-    const arc = { startLat, startLng, endLat, endLng };
+    // add and remove arc after 1 cycle // const arc = { startLat, startLng, endLat, endLng };
+    // setArcsData((curArcsData) => [...curArcsData, arc]);
 
-    setArcsData((curArcsData) => [...curArcsData, arc]);
+    // add and remove arcs after 1 cycle
+    const arcs = getClosestNumberOfLocations.map((location) => {
+      return { startLat: startLat, startLng: startLng, endLat: location.LATITUDE, endLng: location.LONGITUDE };
+    });
+
+    setArcsData((curArcsData) => [...curArcsData, ...arcs]);
+
+    
     setTimeout(
-      () => setArcsData((curArcsData) => curArcsData.filter((d) => d !== arc)),
+      () => setArcsData((curArcsData) => curArcsData.filter((d) => d !== arcs)),
       FLIGHT_TIME * 2
     );
 
@@ -82,28 +107,48 @@ const World = () => {
       FLIGHT_TIME * ARC_REL_LEN
     );
 
-    // add and remove target rings
+    // add and remove multiple target rings using the array from getClosestNumberOfLocations
     setTimeout(() => {
-      const targetRing = { lat: endLat, lng: endLng };
-      setRingsData((curRingsData) => [...curRingsData, targetRing]);
+      const targetRings = getClosestNumberOfLocations.map((location) => {
+        return { lat: location.LATITUDE, lng: location.LONGITUDE };
+      });
+      setRingsData((curRingsData) => [...curRingsData, ...targetRings]);
       setTimeout(
         () =>
           setRingsData((curRingsData) =>
-            curRingsData.filter((r) => r !== targetRing)
+            curRingsData.filter((r) => r !== targetRings)
           ),
         FLIGHT_TIME * ARC_REL_LEN
       );
     }, FLIGHT_TIME);
   }, []);
-  const globeEl = useRef()
+  const globeEl = useRef();
   useEffect(() => {
     // aim at continental US centroid
     globeEl.current.pointOfView({
       lat: 44.34829053934529,
       lng: -97.6,
       altitude: 2,
+    });
+  }, []);
+
+  const gData = getClosestNumberOfLocations
+    .map((location) => {
+      return {
+        name: location.NAME,
+        lat: location.LATITUDE,
+        lng: location.LONGITUDE,
+        size: 0,
+        color: "orange",
+      };
     })
-  }, [])
+    .concat({
+      name: "Your Location",
+      lat: userLatitude,
+      lng: userLongitude,
+      size: 0,
+      color: "green",
+    });
   return (
     <div>
       RISOP nuclear target finder
@@ -114,23 +159,25 @@ const World = () => {
       Longitude: {userLongitude}
       <br />
       <br />
-      
       <br />
       <Globe
-        globeImageUrl="//unpkg.com/three-globe/example/img/earth-day.jpg"
+        globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
         backgroundColor={"#0c1012"}
         onGlobeClick={emitArc}
-        arcAltitudeAutoScale={.3}
+        arcAltitudeAutoScale={0.3}
         arcsData={arcsData}
         arcColor={() => "darkOrange"}
         arcDashLength={ARC_REL_LEN}
         arcDashGap={2}
         arcDashInitialGap={1}
         arcDashAnimateTime={FLIGHT_TIME}
-        arcStroke={.5}
+        arcStroke={0.05}
         arcsTransitionDuration={0}
-        pointLat={userLatitude}
-        pointLng={userLongitude}
+        pointsData={gData}
+        pointAltitude="size"
+        pointColor="color"
+        pointRadius={0.05}
+        // pointsMerge={true}
         ref={globeEl}
         ringsData={ringsData}
         ringColor={() => (t) => `rgba(255,100,50,${1 - t})`}
@@ -155,97 +202,6 @@ const World = () => {
     </div>
   );
 };
-
-// class CoordinatesForm extends Component {
-//   constructor(props) {
-//     super(props);
-//     this.state = {
-//       loading: false,
-//       msg: null,
-//       userLatitude: 35.106766,
-//       userLongitude: -106.629181,
-//     };
-
-//     this.handleInputChange = this.handleInputChange.bind(this);
-//   }
-
-//   handleInputChange(event) {
-//     const target = event.target;
-//     const value = target.type === "checkbox" ? target.checked : target.value;
-//     const name = target.name;
-//     event.preventDefault();
-
-//     this.setState({
-//       [name]: value,
-//     });
-//   }
-
-//   handleClickGetDistance = (api) => (e) => {
-//     e.preventDefault();
-//     const getClosestLocation = risopData.reduce(
-//       (acc, curr) => {
-//         const distance = getDistance(
-//           {
-//             latitude: this.state.userLatitude,
-//             longitude: this.state.userLongitude,
-//           },
-//           { latitude: curr.LATITUDE, longitude: curr.LONGITUDE }
-//         );
-//         if (distance < acc.distance) {
-//           return { distance, location: curr };
-//         }
-//         return acc;
-//       },
-//       { distance: Infinity, location: {} }
-//     );
-
-//     console.log(getClosestLocation);
-//     this.setState({
-//       loading: false,
-//       msg: `You are ${getClosestLocation.distance * 0.000621} miles away from ${
-//         getClosestLocation.location.NAME
-//       }, a ${getClosestLocation.location.SUBCLASS} in ${
-//         getClosestLocation.location.COUNTY
-//       }, ${getClosestLocation.location.ST} `,
-//     });
-//   };
-
-//   render() {
-//     const { loading, msg } = this.state;
-
-//     return (
-//       <form>
-//         <label>
-//           Latitude:
-//           <input
-//             name="userLatitude"
-//             type="text"
-//             value={this.state.userLatitude}
-//             onChange={this.handleInputChange}
-//           />
-//         </label>
-//         <br />
-//         <br />
-//         <label>
-//           Longitude:
-//           <input
-//             name="userLongitude"
-//             type="text"
-//             value={this.state.userLongitude}
-//             onChange={this.handleInputChange}
-//           />
-//         </label>
-//         <br />
-//         <br />
-//         <button onClick={this.handleClickGetDistance("getDistance")}>
-//           {loading ? "Getting distance..." : "Show me"}
-//         </button>
-//         <br />
-//         <span>{msg}</span>
-//       </form>
-//     );
-//   }
-// }
 
 class App extends Component {
   render() {
