@@ -23,7 +23,7 @@ const World = () => {
   const [userLongitude, setUserLongitude] = useState(null);
   const [arcsData, setArcsData] = useState([]);
   const [ringsData, setRingsData] = useState([]);
-  const [headerMsg, setHeaderMsg] = useState('Choose a location in the United States.');
+  const [headerMsg, setHeaderMsg] = useState('Click on a location, and find the nearest U.S. asset likely to be targeted in a Russian nuclear attack');
   const [footerMsg, setFooterMsg] = useState(null);
  
 
@@ -54,10 +54,10 @@ const World = () => {
     setHeaderMsg(
       `You are ${
         (getClosestLocation.distance * 0.000621).toFixed(1)
-      } miles away from a potential target.`
+      } miles away from:`
     );
     setFooterMsg(
-      `${getClosestLocation.location.NAME}, ${getClosestLocation.location.COUNTY} County, ${getClosestLocation.location.ST} `
+      `${getClosestLocation.location.NAME}, ${getClosestLocation.location.SUBCLASS}, located in ${getClosestLocation.location.COUNTY} COUNTY, ${getClosestLocation.location.ST} `
     );
 
     console.log(getClosestLocation);
@@ -106,7 +106,7 @@ const World = () => {
   }, [])
   return (
     <div>
-      Open source RISOP nuclear target finder.
+      RISOP nuclear target finder
       <br />
       <br />
       Latitude: {userLatitude}
@@ -114,10 +114,10 @@ const World = () => {
       Longitude: {userLongitude}
       <br />
       <br />
-      <span>{headerMsg}</span>
+      
       <br />
       <Globe
-        globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+        globeImageUrl="//unpkg.com/three-globe/example/img/earth-day.jpg"
         backgroundColor={"#0c1012"}
         onGlobeClick={emitArc}
         arcsData={arcsData}
@@ -127,13 +127,15 @@ const World = () => {
         arcDashInitialGap={1}
         arcDashAnimateTime={FLIGHT_TIME}
         arcsTransitionDuration={0}
+        pointLat={userLatitude}
+        pointLng={userLongitude}
         ref={globeEl}
         ringsData={ringsData}
         ringColor={() => (t) => `rgba(255,100,50,${1 - t})`}
         ringMaxRadius={RINGS_MAX_R}
         ringPropagationSpeed={RING_PROPAGATION_SPEED}
         ringRepeatPeriod={(FLIGHT_TIME * ARC_REL_LEN) / NUM_RINGS}
-        showAtmosphere={false}
+        // showAtmosphere={false}
         // width={
         //   window.innerWidth < 900 ? window.innerWidth : window.innerWidth / 2
         // }
@@ -144,7 +146,10 @@ const World = () => {
         }
       />
       <br />
+      <span>{headerMsg}</span>
+      <br />
       {footerMsg}
+      <br />
     </div>
   );
 };
