@@ -10,10 +10,10 @@ import Globe from "react-globe.gl";
 //     this.setState({ userLatitude: position.coords.latitude, userLongitude: position.coords.longitude })
 //   })
 // }
-const ARC_REL_LEN = 0.4; // relative to whole arc
-const FLIGHT_TIME = 30000;
-const NUM_RINGS = 5;
-const RINGS_MAX_R = 5; // deg
+const ARC_REL_LEN = 0.2; // relative to whole arc
+const FLIGHT_TIME = 15000;
+const NUM_RINGS = 500;
+const RINGS_MAX_R = 2.5; // deg
 const RING_PROPAGATION_SPEED = 5; // deg/sec
 
 const { useState, useRef, useEffect, useCallback } = React;
@@ -23,7 +23,7 @@ const World = () => {
   const [userLongitude, setUserLongitude] = useState(null);
   const [arcsData, setArcsData] = useState([]);
   const [ringsData, setRingsData] = useState([]);
-  const [headerMsg, setHeaderMsg] = useState('Click on a location, and find the nearest U.S. asset likely to be targeted in a Russian nuclear attack');
+  const [headerMsg, setHeaderMsg] = useState('Click on a location to find the nearest U.S. asset likely to be targeted in a Russian nuclear attack');
   const [footerMsg, setFooterMsg] = useState(null);
  
 
@@ -120,12 +120,14 @@ const World = () => {
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-day.jpg"
         backgroundColor={"#0c1012"}
         onGlobeClick={emitArc}
+        arcAltitudeAutoScale={.3}
         arcsData={arcsData}
         arcColor={() => "darkOrange"}
         arcDashLength={ARC_REL_LEN}
         arcDashGap={2}
         arcDashInitialGap={1}
         arcDashAnimateTime={FLIGHT_TIME}
+        arcStroke={.5}
         arcsTransitionDuration={0}
         pointLat={userLatitude}
         pointLng={userLongitude}
