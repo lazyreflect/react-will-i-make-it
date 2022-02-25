@@ -23,7 +23,7 @@ const World = () => {
   const [userLongitude, setUserLongitude] = useState(null);
   const [arcsData, setArcsData] = useState([]);
   const [ringsData, setRingsData] = useState([]);
-  const [headerMsg, setHeaderMsg] = useState('Click on a location within the United States');
+  const [headerMsg, setHeaderMsg] = useState('Choose a location in the United States.');
   const [footerMsg, setFooterMsg] = useState(null);
  
 
@@ -52,9 +52,9 @@ const World = () => {
       { distance: Infinity, location: {} }
     );
     setHeaderMsg(
-      `The nearest potential target is ${
+      `You are ${
         (getClosestLocation.distance * 0.000621).toFixed(1)
-      } miles away.`
+      } miles away from a potential nuclear war target.`
     );
     setFooterMsg(
       `${getClosestLocation.location.NAME}, ${getClosestLocation.location.COUNTY} County, ${getClosestLocation.location.ST} `
