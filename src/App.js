@@ -13,9 +13,9 @@ import Globe from "react-globe.gl";
 const ARC_REL_LEN = 0.2; // relative to whole arc
 const FLIGHT_TIME = 15000;
 const NUM_RINGS = 5;
-const RINGS_MAX_R = .5; // deg
-const RING_PROPAGATION_SPEED = 1; // deg/sec
-const NUMBER_OF_LOCATIONS = 5; // number of closest targets to show
+const RINGS_MAX_R = .25; // deg
+const RING_PROPAGATION_SPEED = .075; // deg/sec
+const NUMBER_OF_LOCATIONS = 24; // number of closest targets to show
 
 const { useState, useRef, useEffect, useCallback } = React;
 
@@ -25,13 +25,14 @@ const World = () => {
   const [arcsData, setArcsData] = useState([]);
   const [ringsData, setRingsData] = useState([]);
   const [headerMsg, setHeaderMsg] = useState(
-    "Click on a location to find the nearest U.S. asset likely to be targeted in a Russian nuclear attack"
+    "Click on a location to find the nearest U.S. assets likely to be targeted in a nuclear war."
   );
   const [footerMsg, setFooterMsg] = useState(null);
   const [getClosestNumberOfLocations, setGetClosestNumberOfLocations] =
     useState([]);
 
   const prevCoords = useRef({ lat: 70.89, lng: 8.19 });
+  
   const emitArc = useCallback(({ lat: endLat, lng: endLng }) => {
     const { lat: startLat, lng: startLng } = prevCoords.current;
     prevCoords.current = { lat: 70.89, lng: 8.19 }; // prevCoords.current = { lat: endLat, lng: endLng };
@@ -54,13 +55,14 @@ const World = () => {
       },
       { distance: Infinity, location: {} }
     );
+    
     setHeaderMsg(
-      `You are ${(getClosestLocation.distance * 0.000621).toFixed(
+      `The closest potential target is ${(getClosestLocation.distance * 0.000621).toFixed(
         1
-      )} miles away from:`
+      )} miles away in ${getClosestLocation.location.COUNTY} COUNTY, ${getClosestLocation.location.ST}:`
     );
     setFooterMsg(
-      `${getClosestLocation.location.NAME}, ${getClosestLocation.location.SUBCLASS}, located in ${getClosestLocation.location.COUNTY} COUNTY, ${getClosestLocation.location.ST} `
+      `${getClosestLocation.location.NAME}, ${getClosestLocation.location.SUBCLASS} `
     );
 
     const getClosestNumberOfLocations = risopData
@@ -139,7 +141,7 @@ const World = () => {
         lat: location.LATITUDE,
         lng: location.LONGITUDE,
         size: 0,
-        color: "orange",
+        color: "darkOrange",
       };
     })
     .concat({
@@ -151,13 +153,13 @@ const World = () => {
     });
   return (
     <div>
+      <br />
       RISOP nuclear target finder
       <br />
       <br />
       Latitude: {userLatitude}
       <br />
       Longitude: {userLongitude}
-      <br />
       <br />
       <br />
       <Globe
@@ -198,7 +200,6 @@ const World = () => {
       <span>{headerMsg}</span>
       <br />
       {footerMsg}
-      <br />
     </div>
   );
 };
