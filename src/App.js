@@ -13,9 +13,9 @@ import Globe from "react-globe.gl";
 const ARC_REL_LEN = 0.2; // relative to whole arc
 const FLIGHT_TIME = 15000;
 const NUM_RINGS = 5;
-const RINGS_MAX_R = .25; // deg
-const RING_PROPAGATION_SPEED = .075; // deg/sec
-const NUMBER_OF_LOCATIONS = 24; // number of closest targets to show
+const RINGS_MAX_R = 0.25; // deg
+const RING_PROPAGATION_SPEED = 0.075; // deg/sec
+const NUMBER_OF_LOCATIONS = 12; // number of closest targets to show
 
 const { useState, useRef, useEffect, useCallback } = React;
 
@@ -32,7 +32,7 @@ const World = () => {
     useState([]);
 
   const prevCoords = useRef({ lat: 70.89, lng: 8.19 });
-  
+
   const emitArc = useCallback(({ lat: endLat, lng: endLng }) => {
     const { lat: startLat, lng: startLng } = prevCoords.current;
     prevCoords.current = { lat: 70.89, lng: 8.19 }; // prevCoords.current = { lat: endLat, lng: endLng };
@@ -55,11 +55,13 @@ const World = () => {
       },
       { distance: Infinity, location: {} }
     );
-    
+
     setHeaderMsg(
-      `The closest potential target is ${(getClosestLocation.distance * 0.000621).toFixed(
-        1
-      )} miles away in ${getClosestLocation.location.COUNTY} COUNTY, ${getClosestLocation.location.ST}:`
+      `The closest potential target is ${(
+        getClosestLocation.distance * 0.000621
+      ).toFixed(1)} miles away in ${
+        getClosestLocation.location.COUNTY
+      } COUNTY, ${getClosestLocation.location.ST}:`
     );
     setFooterMsg(
       `${getClosestLocation.location.NAME}, ${getClosestLocation.location.SUBCLASS} `
@@ -87,12 +89,16 @@ const World = () => {
 
     // add and remove arcs after 1 cycle
     const arcs = getClosestNumberOfLocations.map((location) => {
-      return { startLat: startLat, startLng: startLng, endLat: location.LATITUDE, endLng: location.LONGITUDE };
+      return {
+        startLat: startLat,
+        startLng: startLng,
+        endLat: location.LATITUDE,
+        endLng: location.LONGITUDE,
+      };
     });
 
     setArcsData((curArcsData) => [...curArcsData, ...arcs]);
 
-    
     setTimeout(
       () => setArcsData((curArcsData) => curArcsData.filter((d) => d !== arcs)),
       FLIGHT_TIME * 2
@@ -130,17 +136,17 @@ const World = () => {
     globeEl.current.pointOfView({
       lat: 44.34829053934529,
       lng: -97.6,
-      altitude: 2,
+      altitude: 1.5,
     });
   }, []);
 
   const gData = getClosestNumberOfLocations
     .map((location) => {
       return {
-        name: location.NAME,
+        name: `${location.NAME} | ${location.SUBCLASS}`,
         lat: location.LATITUDE,
         lng: location.LONGITUDE,
-        size: 0,
+        size: (Math.random() * (.915 - .875) + .875),
         color: "darkOrange",
       };
     })
@@ -148,7 +154,7 @@ const World = () => {
       name: "Your Location",
       lat: userLatitude,
       lng: userLongitude,
-      size: 0,
+      size: .920,
       color: "green",
     });
   return (
@@ -166,19 +172,26 @@ const World = () => {
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
         backgroundColor={"#0c1012"}
         onGlobeClick={emitArc}
-        arcAltitudeAutoScale={0.3}
+        arcAltitudeAutoScale={3}
         arcsData={arcsData}
         arcColor={() => "darkOrange"}
         arcDashLength={ARC_REL_LEN}
         arcDashGap={2}
         arcDashInitialGap={1}
         arcDashAnimateTime={FLIGHT_TIME}
-        arcStroke={0.05}
+        arcStroke={0.0125}
         arcsTransitionDuration={0}
         pointsData={gData}
         pointAltitude="size"
         pointColor="color"
-        pointRadius={0.05}
+        pointRadius={0.00125}
+        labelsData={gData}
+        labelAltitude="size"
+        labelColor="color"
+        labelDotOrientation={() => "right"}
+        labelDotRadius={0.0125}
+        labelText="name"
+        labelSize={0.025}
         // pointsMerge={true}
         ref={globeEl}
         ringsData={ringsData}
