@@ -20,8 +20,8 @@ const NUMBER_OF_LOCATIONS = 12; // number of closest targets to show
 const { useState, useRef, useEffect, useCallback } = React;
 
 const World = () => {
-  const [userLatitude, setUserLatitude] = useState(44.34829053934529);
-  const [userLongitude, setUserLongitude] = useState(-97.6);
+  const [userLatitude, setUserLatitude] = useState(35.106766);
+  const [userLongitude, setUserLongitude] = useState(-106.629181);
   const [arcsData, setArcsData] = useState([]);
   const [ringsData, setRingsData] = useState([]);
   const [headerMsg, setHeaderMsg] = useState(
@@ -136,7 +136,7 @@ const World = () => {
     globeEl.current.pointOfView({
       lat: userLatitude,
       lng: userLongitude,
-      altitude: .95,
+      altitude: .935,
     });
   }, [userLatitude, userLongitude]);
 
@@ -154,7 +154,7 @@ const World = () => {
       name: `${userLatitude}, ${userLongitude}`,
       lat: userLatitude,
       lng: userLongitude,
-      size: .920,
+      size: .91,
       color: "green",
     });
   return (
