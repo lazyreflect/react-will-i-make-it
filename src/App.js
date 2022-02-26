@@ -225,6 +225,7 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <World />
+          <a href="https://visualcustody.com">Visual Custody</a>
           {/* <CoordinatesForm /> */}
         </header>
       </div>
