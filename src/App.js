@@ -25,7 +25,7 @@ const World = () => {
   const [arcsData, setArcsData] = useState([]);
   const [ringsData, setRingsData] = useState([]);
   const [headerMsg, setHeaderMsg] = useState(
-    "Click on a location to find the nearest U.S. assets likely to be targeted in a nuclear war."
+    "Click or tap on a location in the U.S. to determine its blast risk during total nuclear war."
   );
   const [footerMsg, setFooterMsg] = useState(null);
   const [getClosestNumberOfLocations, setGetClosestNumberOfLocations] =
@@ -136,7 +136,7 @@ const World = () => {
     globeEl.current.pointOfView({
       lat: 44.34829053934529,
       lng: -97.6,
-      altitude: 1.5,
+      altitude: 2,
     });
   }, []);
 
@@ -160,13 +160,18 @@ const World = () => {
   return (
     <div>
       <br />
-      RISOP nuclear target finder
+      Potential Nuclear Blast Risk Modeler v0.2 
       <br />
       <br />
-      Latitude: {userLatitude}
+      Only hypothetical U.S. based targets from <a href="https://github.com/davidteter/OPEN-RISOP">OPEN-RISOP</a> are shown.
+      <br />
+      <br />
+      Zoom to see details.
+      <br />
+      {/* Latitude: {userLatitude}
       <br />
       Longitude: {userLongitude}
-      <br />
+      <br /> */}
       <br />
       <Globe
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
