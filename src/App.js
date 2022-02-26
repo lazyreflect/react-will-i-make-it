@@ -20,8 +20,8 @@ const NUMBER_OF_LOCATIONS = 12; // number of closest targets to show
 const { useState, useRef, useEffect, useCallback } = React;
 
 const World = () => {
-  const [userLatitude, setUserLatitude] = useState(null);
-  const [userLongitude, setUserLongitude] = useState(null);
+  const [userLatitude, setUserLatitude] = useState(44.34829053934529);
+  const [userLongitude, setUserLongitude] = useState(-97.6);
   const [arcsData, setArcsData] = useState([]);
   const [ringsData, setRingsData] = useState([]);
   const [headerMsg, setHeaderMsg] = useState(
@@ -134,11 +134,11 @@ const World = () => {
   useEffect(() => {
     // aim at continental US centroid
     globeEl.current.pointOfView({
-      lat: 44.34829053934529,
-      lng: -97.6,
-      altitude: 2,
+      lat: userLatitude,
+      lng: userLongitude,
+      altitude: .95,
     });
-  }, []);
+  }, [userLatitude, userLongitude]);
 
   const gData = getClosestNumberOfLocations
     .map((location) => {
@@ -146,12 +146,12 @@ const World = () => {
         name: `${location.NAME} | ${location.SUBCLASS}`,
         lat: location.LATITUDE,
         lng: location.LONGITUDE,
-        size: (Math.random() * (.915 - .875) + .875),
+        size: (Math.random() * (.91 - .9) + .9),
         color: "darkOrange",
       };
     })
     .concat({
-      name: "Your Location",
+      name: `${userLatitude}, ${userLongitude}`,
       lat: userLatitude,
       lng: userLongitude,
       size: .920,
@@ -164,9 +164,6 @@ const World = () => {
       <br />
       <br />
       Only hypothetical U.S. based targets from <a href="https://github.com/davidteter/OPEN-RISOP">OPEN-RISOP</a> are shown.
-      <br />
-      <br />
-      Zoom to see details.
       <br />
       {/* Latitude: {userLatitude}
       <br />
@@ -194,7 +191,7 @@ const World = () => {
         labelAltitude="size"
         labelColor="color"
         labelDotOrientation={() => "right"}
-        labelDotRadius={0.0125}
+        labelDotRadius={0.005}
         labelText="name"
         labelSize={0.025}
         // pointsMerge={true}
