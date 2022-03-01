@@ -4,6 +4,7 @@ import "./App.css";
 import { getDistance } from "geolib";
 import { risopData } from "./risopData";
 import Globe from "react-globe.gl";
+import Autocomplete from "react-google-autocomplete";
 
 // const getUserLocation = () => {
 //   navigator.geolocation.getCurrentPosition(position => {
@@ -12,43 +13,52 @@ import Globe from "react-globe.gl";
 // }
 const ARC_REL_LEN = 0.2; // relative to whole arc
 const FLIGHT_TIME = 15000;
-const NUM_RINGS = 5;
-const RINGS_MAX_R = 0.25; // deg
-const RING_PROPAGATION_SPEED = 0.075; // deg/sec
+const NUM_RINGS = 10;
+const RINGS_MAX_R = 0.05; // deg
+const RING_PROPAGATION_SPEED = 0.0095; // deg/sec
 const NUMBER_OF_LOCATIONS = 12; // number of closest targets to show
+const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY
+console.log(GOOGLE_MAPS_API_KEY)
 
-const { useState, useRef, useEffect, useCallback } = React;
+const { useState, useRef, useEffect, useCallback} = React;
 
 const World = () => {
-  const [userLatitude, setUserLatitude] = useState(35.106766);
-  const [userLongitude, setUserLongitude] = useState(-106.629181);
+  const [userLatitude, setUserLatitude] = useState(35.079884);
+  const [userLongitude, setUserLongitude] = useState(-106.604624);
+  const [userName, setUserName ] = useState("Albuquerque, NM, USA");
   const [arcsData, setArcsData] = useState([]);
   const [ringsData, setRingsData] = useState([]);
-  const [headerMsg, setHeaderMsg] = useState(
-    "Click or tap on a location in the U.S. to determine its blast risk during total nuclear war."
-  );
+  const [headerMsg, setHeaderMsg] = useState([]);
   const [footerMsg, setFooterMsg] = useState(null);
   const [getClosestNumberOfLocations, setGetClosestNumberOfLocations] =
     useState([]);
 
   const prevCoords = useRef({ lat: 70.89, lng: 8.19 });
 
-  const emitArc = useCallback(({ lat: endLat, lng: endLng }) => {
+  const emitArc = useCallback(() => {
     const { lat: startLat, lng: startLng } = prevCoords.current;
     prevCoords.current = { lat: 70.89, lng: 8.19 }; // prevCoords.current = { lat: endLat, lng: endLng };
-    setUserLatitude(endLat);
-    setUserLongitude(endLng);
+    // setUserLatitude(endLat);
+    // setUserLongitude(endLng);
 
     const getClosestLocation = risopData.reduce(
       (acc, curr) => {
         const distance = getDistance(
           {
-            latitude: endLat,
-            longitude: endLng,
+            latitude: userLatitude,
+            longitude: userLongitude,
           },
           { latitude: curr.LATITUDE, longitude: curr.LONGITUDE }
         );
         if (distance < acc.distance) {
+          setHeaderMsg(
+            `The closest potential target is ${(
+              distance * 0.000621
+            ).toFixed(1)} miles away`
+          );
+          setFooterMsg(
+            `${curr.NAME}, ${curr.SUBCLASS} `
+          );
           return { distance, location: curr };
         }
         return acc;
@@ -56,26 +66,17 @@ const World = () => {
       { distance: Infinity, location: {} }
     );
 
-    setHeaderMsg(
-      `The closest potential target is ${(
-        getClosestLocation.distance * 0.000621
-      ).toFixed(1)} miles away in ${
-        getClosestLocation.location.COUNTY
-      } COUNTY, ${getClosestLocation.location.ST}:`
-    );
-    setFooterMsg(
-      `${getClosestLocation.location.NAME}, ${getClosestLocation.location.SUBCLASS} `
-    );
+   
 
     const getClosestNumberOfLocations = risopData
       .sort(
         (a, b) =>
           getDistance(
-            { latitude: endLat, longitude: endLng },
+            { latitude: userLatitude, longitude: userLongitude },
             { latitude: a.LATITUDE, longitude: a.LONGITUDE }
           ) -
           getDistance(
-            { latitude: endLat, longitude: endLng },
+            { latitude: userLatitude, longitude: userLongitude },
             { latitude: b.LATITUDE, longitude: b.LONGITUDE }
           )
       )
@@ -129,51 +130,68 @@ const World = () => {
         FLIGHT_TIME * ARC_REL_LEN
       );
     }, FLIGHT_TIME);
-  }, []);
+  }, [userLatitude, userLongitude]);
   const globeEl = useRef();
   useEffect(() => {
     // aim at continental US centroid
     globeEl.current.pointOfView({
       lat: userLatitude,
       lng: userLongitude,
-      altitude: .935,
+      altitude: 0.01,
     });
   }, [userLatitude, userLongitude]);
 
   const gData = getClosestNumberOfLocations
     .map((location) => {
       return {
-        name: `${location.NAME} | ${location.SUBCLASS}`,
+        name: `${location.NAME}`,
         lat: location.LATITUDE,
         lng: location.LONGITUDE,
-        size: (Math.random() * (.91 - .9) + .9),
+        size: .007,
         color: "darkOrange",
       };
     })
     .concat({
-      name: `${userLatitude}, ${userLongitude}`,
+      name: `${userName}`,
       lat: userLatitude,
       lng: userLongitude,
-      size: .91,
+      size: .008,
       color: "green",
     });
   return (
     <div>
       <br />
-      Potential Nuclear Blast Risk Modeler v0.2 
+      Potential Nuclear Blast Risk Modeler v0.3
+      {/* <br />
       <br />
-      <br />
-      Only hypothetical U.S. based targets from <a href="https://github.com/davidteter/OPEN-RISOP">OPEN-RISOP</a> are shown.
-      <br />
+      Only hypothetical U.S. based targets from{" "}
+      <a href="https://github.com/davidteter/OPEN-RISOP">OPEN-RISOP</a> are
+      shown.
+      <br /> */}
       {/* Latitude: {userLatitude}
       <br />
       Longitude: {userLongitude}
       <br /> */}
+      <Autocomplete
+        apiKey={GOOGLE_MAPS_API_KEY}
+        style={{ width: "50%" }}
+        onPlaceSelected={(place) => {
+          console.log('place', place, place.geometry.location.lat(), place.geometry.location.lng());
+          setUserLatitude(place.geometry.location.lat());
+          setUserLongitude(place.geometry.location.lng());
+          setUserName(place.formatted_address);        
+        }}
+        options={{
+          types: ["geocode"],
+          componentRestrictions: { country: "us" },
+        }}
+        defaultValue=""
+      /><button onClick={emitArc}>Calculate Risk</button>
       <br />
       <Globe
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
         backgroundColor={"#0c1012"}
-        onGlobeClick={emitArc}
+        // onGlobeClick={emitArc}
         arcAltitudeAutoScale={3}
         arcsData={arcsData}
         arcColor={() => "darkOrange"}
@@ -181,19 +199,19 @@ const World = () => {
         arcDashGap={2}
         arcDashInitialGap={1}
         arcDashAnimateTime={FLIGHT_TIME}
-        arcStroke={0.0125}
+        arcStroke={0.00125}
         arcsTransitionDuration={0}
         pointsData={gData}
         pointAltitude="size"
         pointColor="color"
-        pointRadius={0.00125}
+        pointRadius={0.00025}
         labelsData={gData}
         labelAltitude="size"
         labelColor="color"
         labelDotOrientation={() => "right"}
-        labelDotRadius={0.005}
+        labelDotRadius={0.0005}
         labelText="name"
-        labelSize={0.025}
+        labelSize={0.0025}
         // pointsMerge={true}
         ref={globeEl}
         ringsData={ringsData}
