@@ -52,12 +52,12 @@ const World = () => {
         );
         if (distance < acc.distance) {
           setHeaderMsg(
-            `The closest potential target is ${(
+            `You are ${(
               distance * 0.000621
-            ).toFixed(1)} miles away`
+            ).toFixed(1)} miles away from: ${curr.NAME}`
           );
           setFooterMsg(
-            `${curr.NAME}, ${curr.SUBCLASS} `
+            `Target category: ${curr.SUBCLASS} `
           );
           return { distance, location: curr };
         }
@@ -69,21 +69,33 @@ const World = () => {
    
 
     const getClosestNumberOfLocations = risopData
-      .sort(
-        (a, b) =>
-          getDistance(
-            { latitude: userLatitude, longitude: userLongitude },
-            { latitude: a.LATITUDE, longitude: a.LONGITUDE }
-          ) -
-          getDistance(
-            { latitude: userLatitude, longitude: userLongitude },
-            { latitude: b.LATITUDE, longitude: b.LONGITUDE }
-          )
-      )
-      .slice(0, NUMBER_OF_LOCATIONS);
+    .sort(
+      (a, b) =>
+        getDistance(
+          { latitude: userLatitude, longitude: userLongitude },
+          { latitude: a.LATITUDE, longitude: a.LONGITUDE }
+        ) -
+        getDistance(
+          { latitude: userLatitude, longitude: userLongitude },
+          { latitude: b.LATITUDE, longitude: b.LONGITUDE }
+        )
+    )
+    .slice(0, NUMBER_OF_LOCATIONS)
+    .map(location => ({ ...location, DISTANCE: getDistance(
+      { latitude: userLatitude, longitude: userLongitude },
+      { latitude: location.LATITUDE, longitude: location.LONGITUDE }
+    )}));
     console.log(getClosestLocation);
     console.log(getClosestNumberOfLocations);
     setGetClosestNumberOfLocations(getClosestNumberOfLocations);
+    
+    //   `The closest potential target is ${(
+    //     distance * 0.000621
+    //   ).toFixed(1)} miles away`
+    // );
+    // setFooterMsg(
+    //   `${curr.NAME}, ${curr.SUBCLASS} `
+    // );
 
     // add and remove arc after 1 cycle // const arc = { startLat, startLng, endLat, endLng };
     // setArcsData((curArcsData) => [...curArcsData, arc]);
@@ -144,7 +156,10 @@ const World = () => {
   const gData = getClosestNumberOfLocations
     .map((location) => {
       return {
-        name: `${location.NAME}`,
+        name: `${location.NAME} | ${(
+          location.DISTANCE * 0.000621
+        ).toFixed(1)} mi`,
+        distance: location.DISTANCE,
         lat: location.LATITUDE,
         lng: location.LONGITUDE,
         size: .007,
@@ -161,17 +176,7 @@ const World = () => {
   return (
     <div>
       <br />
-      Potential Nuclear Blast Risk Modeler v0.3
-      {/* <br />
-      <br />
-      Only hypothetical U.S. based targets from{" "}
-      <a href="https://github.com/davidteter/OPEN-RISOP">OPEN-RISOP</a> are
-      shown.
-      <br /> */}
-      {/* Latitude: {userLatitude}
-      <br />
-      Longitude: {userLongitude}
-      <br /> */}
+      Find Nuclear War Targets Near You (U.S. only)
       <Autocomplete
         apiKey={GOOGLE_MAPS_API_KEY}
         style={{ width: "50%" }}
@@ -232,7 +237,8 @@ const World = () => {
       <br />
       <span>{headerMsg}</span>
       <br />
-      {footerMsg}
+      <br />
+      <span>{footerMsg}</span>
     </div>
   );
 };
@@ -243,7 +249,9 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <World />
-          <a href="https://visualcustody.com">Visual Custody</a>
+          <br />
+          <br />
+         Demo created by <a href="https://visualcustody.com">Visual Custody</a>
           {/* <CoordinatesForm /> */}
         </header>
       </div>
