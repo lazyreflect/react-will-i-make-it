@@ -177,6 +177,7 @@ const World = () => {
     <div>
       <br />
       Find Nuclear War Targets Near You (U.S. only)
+      <br />
       <Autocomplete
         apiKey={GOOGLE_MAPS_API_KEY}
         style={{ width: "50%" }}
@@ -249,7 +250,6 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <World />
-          <br />
           <br />
          Demo created by <a href="https://visualcustody.com">Visual Custody</a>
           {/* <CoordinatesForm /> */}
